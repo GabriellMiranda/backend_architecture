@@ -25,6 +25,8 @@ O diretório principal pode conter subdiretórios para diferentes serviços ou c
 |-- tests/
 |-- ...
 
+
+
 * src: O diretório principal para o código-fonte da aplicação.
 * function_lambda: Contém o código para a função Lambda 1.
 * function_lambda2: Contém o código para a função Lambda 2.
