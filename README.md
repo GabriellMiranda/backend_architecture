@@ -45,5 +45,5 @@ O diretório principal pode conter subdiretórios para diferentes serviços ou c
   
 2. Configuração dos Componentes:
    
-* Dentro de cada diretório (function_lambda, api, etc.), forneça instruções claras sobre como configurar e executar os componentes específicos.
+* Dentro de cada diretório (function_lambda, api, etc.), forneça instruções claras sobre como configurar e executar os componentes específicos..
 
