@@ -8,24 +8,6 @@ A estrutura fornecida suporta diversos componentes backend, como Lambdas, APIs, 
 A estrutura do projeto é projetada para oferecer flexibilidade e modularidade, facilitando a incorporação de microsserviços independentes.
 O diretório principal pode conter subdiretórios para diferentes serviços ou componentes.
 
-/
-|-- src
-|   |-- function_lambda/
-|   |   |-- ...
-|   |-- function_lambda2/
-|   |   |-- ...
-|   |-- api/
-|   |   |-- ...
-|   |-- common/
-|   |   |-- ...
-|   |-- infra/
-|   |   |-- ...
-|-- README.md
-|-- .gitignore
-|-- tests/
-|-- ...
-
-
 
 * src: O diretório principal para o código-fonte da aplicação.
 * function_lambda: Contém o código para a função Lambda 1.
