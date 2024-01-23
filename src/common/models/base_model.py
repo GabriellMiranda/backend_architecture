@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Column, DateTime, Integer
 from datetime import datetime
 
 
-class MDQuotaBaseModel:
+class BaseModel:
     _table_args_ = {"schema": os.environ.get("SCHEMA")}
 
     created_at = Column(DateTime, default=datetime.now)

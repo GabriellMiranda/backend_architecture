@@ -6,7 +6,7 @@ from typing import Dict, List, Any
 
 from common.logger import logger
 from common.dynamo.dynamo_connection import dynamodb
-from simple_common.utils import serialize_dynamo_item, deserialize_dynamo_item
+from common.utils import serialize_dynamo_item, deserialize_dynamo_item
 
 
 class DynamoAbstractRepository(metaclass=ABCMeta):

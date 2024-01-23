@@ -1,0 +1,106 @@
+name: Deploy
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  Build-Release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "REQUIREMENTS_FILE_FUNCTION_LAMBDA=requirements_function_lambda.txt" >> $GITHUB_ENV
+          echo "REQUIREMENTS_FILE_API=requirements_api.txt" >> $GITHUB_ENV
+
+      - name: Check AWS CLI version
+        run: aws --version
+
+      - name: Check environment variables
+        run: |
+          echo REQUIREMENTS_FILE_FUNCTION_LAMBDA
+          echo $REQUIREMENTS_FILE_API
+
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install local app dependencies
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          pip install -r REQUIREMENTS_FILE_FUNCTION_LAMBDA -t ./dependence_function_lambda
+          pip install -r $REQUIREMENTS_FILE_API -t ./dependence_api
+        
+
+      - name: Delete unnecessary build files
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          find . -type d -name "_pycache_" -exec rm -rv {} +
+          find . -type d -name ".pytest_cache" -exec rm -rv {} +
+          find . -type d -name "*.dist-info" -exec rm -rv {} +
+
+      - name: Set repository name
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY//GABRIELL_MIRANDA'/'}" >> $GITHUB_ENV
+
+      - name: Zip Artifacts - funcao lambda
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          mkdir deploy_function_lambda
+          cp -r dependence_function_lambda/* function_lambda simple_common common deploy_function_lambda/
+          cd deploy_function_lambda/ && zip -r ../deploy_function_lambda.zip .
+
+      - name: Zip Artifacts - api
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          mkdir deploy_api
+          cp -r dependence_api/* api simple_common common deploy_api/
+          cd deploy_api/ && zip -r ../deploy_api.zip .
+
+      - name: Configure AWS Credentials - Staging
+        if: github.BASE_REF != 'main' || github.REF_NAME != 'main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID_STAGING}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY_STAGING}}
+          aws-region: us-east-1
+
+      - name: Deploy to AWS - Staging
+        if: github.BASE_REF != 'main' || github.REF_NAME != 'main'
+        env:
+          LAMBDA_FUNCTION_LAMBDA: ${{secrets.LAMBDA_FUNCTION_LAMBDA_STAGING}}
+          LAMBDA_API: ${{secrets.LAMBDA_API_STAGING}}
+
+
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          aws lambda update-function-code --function-name=$LAMBDA_FUNCTION_LAMBDA --zip-file=fileb://deploy_function_lambda.zip
+          aws lambda update-function-code --function-name=$LAMBDA_API --zip-file=fileb://deploy_api.zip
+
+
+      - name: Configure AWS Credentials - Production
+        if: github.BASE_REF == 'main' || github.REF_NAME == 'main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: us-east-1
+
+      - name: Deploy to AWS - Production
+        if: github.BASE_REF == 'main' || github.REF_NAME == 'main'
+        env:
+          LAMBDA_FUNCTION_LAMBDA: ${{secrets.LAMBDA_FUNCTION_LAMBDA_PROD}}
+          LAMBDA_API: ${{secrets.LAMBDA_API_PROD}}
+
+
+        run: |
+          cd $GITHUB_WORKSPACE/src/
+          aws lambda update-function-code --function-name=$LAMBDA_FUNCTION_LAMBDA --zip-file=fileb://deploy_function_lambda.zip
+          aws lambda update-function-code --function-name=$LAMBDA_API --zip-file=fileb://deploy_api.zip

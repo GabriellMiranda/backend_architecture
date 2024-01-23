@@ -6,3 +6,7 @@ boto3~=1.28.69
 botocore~=1.31.69
 common~=0.1.2
 simplejson~=3.19.2
+PyMySQL~=1.1.0
+starlette~=0.26.1
+mangum~=0.17.0
+pydantic~=1.10.14
